@@ -8,12 +8,19 @@ const Cuisine = () => {
   let params = useParams();
 
   const getCuisine = async (name) => {
-    const data = await fetch(
-      `https://api.spoonacular.com/recipes/complexSearch?apiKey=${process.env.REACT_APP_API_KEY}&cuisine=${name}`
-    );
+    const check = localStorage.getItem(params.type);
 
-    const recipes = await data.json();
-    setCuisine(recipes.results);
+    if (check) {
+      setCuisine(JSON.parse(check));
+    } else {
+      const data = await fetch(
+        `https://api.spoonacular.com/recipes/complexSearch?apiKey=${process.env.REACT_APP_API_KEY}&cuisine=${name}&number=15`
+      );
+
+      const recipes = await data.json();
+      localStorage.setItem(params.type, JSON.stringify(recipes.results));
+      setCuisine(recipes.results);
+    }
   };
 
   useEffect(() => {
@@ -25,8 +32,10 @@ const Cuisine = () => {
       {cuisine.map((item) => {
         return (
           <Card key={item.id}>
-            <img src={item.image} alt="" />
-            <h4>{item.title}</h4>
+            <Link to={"/recipe/" + item.id}>
+              <img src={item.image} alt="" />
+              <h4>{item.title}</h4>
+            </Link>
           </Card>
         );
       })}
